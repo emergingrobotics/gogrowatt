@@ -1,6 +1,5 @@
 # GoGrowatt Makefile
 
-BINARY_NAME := growatt-export
 BUILD_DIR := bin
 GO := go
 GOFLAGS := -v
@@ -15,25 +14,26 @@ help:
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  build    Build the growatt-export binary"
+	@echo "  build    Build all binaries (growatt-export, growatt-power)"
 	@echo "  test     Run all tests"
 	@echo "  cover    Run tests with coverage report"
 	@echo "  clean    Remove build artifacts"
-	@echo "  install  Install binary to GOPATH/bin"
+	@echo "  install  Install binaries to GOPATH/bin"
 	@echo "  fmt      Format code with gofmt"
 	@echo "  vet      Run go vet"
 	@echo "  lint     Run fmt and vet"
-	@echo "  run      Build and run with sample args (requires PLANT_ID env)"
+	@echo "  run      Build and run growatt-export with sample args (requires PLANT_ID env)"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make build"
 	@echo "  make test"
 	@echo "  PLANT_ID=12345 make run"
 
-# Build the binary
+# Build all binaries
 build:
 	@mkdir -p $(BUILD_DIR)
-	$(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/$(BINARY_NAME) ./cmd/growatt-export
+	$(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/growatt-export ./cmd/growatt-export
+	$(GO) build $(GOFLAGS) -ldflags "$(LDFLAGS)" -o $(BUILD_DIR)/growatt-power ./cmd/growatt-power
 
 # Run all tests
 test:
@@ -54,6 +54,7 @@ clean:
 # Install to GOPATH/bin
 install:
 	$(GO) install ./cmd/growatt-export
+	$(GO) install ./cmd/growatt-power
 
 # Format code
 fmt:
