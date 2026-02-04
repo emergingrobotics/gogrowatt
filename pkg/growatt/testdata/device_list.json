@@ -1,0 +1,17 @@
+{
+  "error_code": 0,
+  "error_msg": "success",
+  "data": {
+    "count": 1,
+    "devices": [
+      {
+        "device_sn": "ABC123456",
+        "device_type": 7,
+        "device_name": "MIN 9000TL-X",
+        "status": 1,
+        "model": "MIN 9000TL-X",
+        "last_update": "2025-02-03 12:30:00"
+      }
+    ]
+  }
+}

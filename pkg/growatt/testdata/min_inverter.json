@@ -1,0 +1,19 @@
+{
+  "error_code": 0,
+  "error_msg": "success",
+  "data": {
+    "tlx_sn": "ABC123456",
+    "status": 1,
+    "pac": 4523.5,
+    "etoday": 32.5,
+    "etotal": 15234.8,
+    "vpv1": 385.2,
+    "vpv2": 378.6,
+    "ipv1": 5.8,
+    "ipv2": 5.9,
+    "vac1": 240.5,
+    "iac1": 18.8,
+    "fac": 60.01,
+    "temperature": 42.5
+  }
+}
