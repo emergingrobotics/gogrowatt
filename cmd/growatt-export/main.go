@@ -28,7 +28,7 @@ var (
 	fromDate  string
 	toDate    string
 	date      string
-	output    string
+	folder    string
 	token     string
 	baseURL   string
 	showGraph bool
@@ -65,7 +65,7 @@ Examples:
 	rootCmd.Flags().StringVar(&fromDate, "from", "", "Start date (YYYY-MM-DD)")
 	rootCmd.Flags().StringVar(&toDate, "to", "", "End date (YYYY-MM-DD)")
 	rootCmd.Flags().StringVar(&date, "date", "", "Single date (YYYY-MM-DD)")
-	rootCmd.Flags().StringVar(&output, "output", ".", "Output directory")
+	rootCmd.Flags().StringVarP(&folder, "folder", "f", "./data", "Output folder for CSV files")
 	rootCmd.Flags().StringVar(&token, "token", "", "API token (overrides GROWATT_API_KEY)")
 	rootCmd.Flags().StringVar(&baseURL, "base-url", "", "API base URL")
 	rootCmd.Flags().BoolVarP(&showGraph, "graph", "g", false, "Display ASCII graph of hourly power production")
@@ -142,9 +142,9 @@ func run(cmd *cobra.Command, args []string) error {
 		tz = "US/Central"
 	}
 
-	// Ensure output directory exists
-	if err := os.MkdirAll(output, 0755); err != nil {
-		return fmt.Errorf("creating output directory: %w", err)
+	// Ensure output folder exists
+	if err := os.MkdirAll(folder, 0755); err != nil {
+		return fmt.Errorf("creating output folder: %w", err)
 	}
 
 	fmt.Printf("Fetching power data for device %s from %s to %s...\n",
@@ -164,13 +164,13 @@ func run(cmd *cobra.Command, args []string) error {
 	var rawCSVFile, hourlyCSVFile, statsFile string
 	if from.Equal(to) {
 		dateStr := from.Format("2006-01-02")
-		rawCSVFile = filepath.Join(output, fmt.Sprintf("power_%s.csv", dateStr))
-		hourlyCSVFile = filepath.Join(output, fmt.Sprintf("hourly_%s.csv", dateStr))
+		rawCSVFile = filepath.Join(folder, fmt.Sprintf("power_%s.csv", dateStr))
+		hourlyCSVFile = filepath.Join(folder, fmt.Sprintf("hourly_%s.csv", dateStr))
 	} else {
 		dateRange := fmt.Sprintf("%s_to_%s", from.Format("2006-01-02"), to.Format("2006-01-02"))
-		rawCSVFile = filepath.Join(output, fmt.Sprintf("power_%s.csv", dateRange))
-		hourlyCSVFile = filepath.Join(output, fmt.Sprintf("hourly_%s.csv", dateRange))
-		statsFile = filepath.Join(output, fmt.Sprintf("stats_%s.md", dateRange))
+		rawCSVFile = filepath.Join(folder, fmt.Sprintf("power_%s.csv", dateRange))
+		hourlyCSVFile = filepath.Join(folder, fmt.Sprintf("hourly_%s.csv", dateRange))
+		statsFile = filepath.Join(folder, fmt.Sprintf("stats_%s.md", dateRange))
 	}
 
 	// Write raw CSV

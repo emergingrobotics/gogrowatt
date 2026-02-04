@@ -2,6 +2,14 @@
 
 A Go library and CLI tool for accessing solar production data from Growatt inverters via the OpenAPI v1.
 
+## Disclaimer
+
+**This software is provided for personal use only.** We take no responsibility for its use by others. This tool has only been tested with the specific inverter model we own and may not work correctly with other Growatt devices or configurations.
+
+Use at your own risk. We make no warranties regarding functionality, accuracy, or compatibility with your specific setup.
+
+**Pull requests are welcome!** If you've tested this with a different inverter model or have improvements to contribute, we'd love to see them.
+
 ## Why Monitor Your Solar Production?
 
 Your solar installation generates valuable data every five minutes. Understanding your production patterns helps you:
@@ -99,10 +107,42 @@ Wrote hourly data to hourly_2025-01-01_to_2025-01-31.csv
 Wrote statistics to stats_2025-01-01_to_2025-01-31.md
 ```
 
-### Export to a Specific Directory
+### Export to a Specific Folder
+
+By default, files are saved to `./data`. To specify a different folder:
 
 ```bash
-./bin/growatt-export --from=2025-01-01 --to=2025-01-07 --output=./solar-data
+./bin/growatt-export --from=2025-01-01 --to=2025-01-07 --folder=./solar-data
+# or
+./bin/growatt-export --from=2025-01-01 --to=2025-01-07 -f ./solar-data
+```
+
+### Display ASCII Graph
+
+Add `-g` or `--graph` to display an ASCII bar chart of hourly power production:
+
+```bash
+./bin/growatt-export --graph today
+./bin/growatt-export -g --date=2026-02-03
+```
+
+Example output:
+```
+Power Production - 2026-02-03 (Total: 8.45 kWh)
+
+ 2.50 |                  ########
+      |                ############
+ 1.25 |              ################
+      |            ####################
+      |          ########################
+      |        ############################
+      |      ################################
+ 0.17 |##############################################
+      +------------------------------------------------
+       0     3     6     9     12    15    18    21
+       Hour of day
+
+kWh
 ```
 
 ### Use a Different API Endpoint
