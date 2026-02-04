@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -192,6 +195,134 @@ func TestWriteStatsMarkdown(t *testing.T) {
 	// Check interpretation guide
 	if !strings.Contains(contentStr, "## Interpretation Guide") {
 		t.Error("missing interpretation guide")
+	}
+}
+
+func TestResolvePlantID_FromFlag(t *testing.T) {
+	// When flag is provided, use it directly (no API call needed)
+	client := growatt.NewClient("test-token")
+	ctx := context.Background()
+
+	result, err := resolvePlantID(ctx, client, "flag-plant-id")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != "flag-plant-id" {
+		t.Errorf("expected %q, got %q", "flag-plant-id", result)
+	}
+}
+
+func TestResolvePlantID_FromEnv(t *testing.T) {
+	os.Setenv(EnvPlantID, "env-plant-id")
+	defer os.Unsetenv(EnvPlantID)
+
+	client := growatt.NewClient("test-token")
+	ctx := context.Background()
+
+	result, err := resolvePlantID(ctx, client, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != "env-plant-id" {
+		t.Errorf("expected %q, got %q", "env-plant-id", result)
+	}
+}
+
+func TestResolvePlantID_AutoDetectSingle(t *testing.T) {
+	os.Unsetenv(EnvPlantID)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{
+			"error_code": 0,
+			"error_msg": "success",
+			"data": {
+				"count": 1,
+				"plants": [{"plant_id": "auto-detected-123", "plant_name": "My Solar"}]
+			}
+		}`))
+	}))
+	defer server.Close()
+
+	client := growatt.NewClient("test-token",
+		growatt.WithBaseURL(server.URL+"/"),
+		growatt.WithRateLimit(0),
+	)
+	ctx := context.Background()
+
+	result, err := resolvePlantID(ctx, client, "")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if result != "auto-detected-123" {
+		t.Errorf("expected %q, got %q", "auto-detected-123", result)
+	}
+}
+
+func TestResolvePlantID_MultiplePlantsError(t *testing.T) {
+	os.Unsetenv(EnvPlantID)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{
+			"error_code": 0,
+			"error_msg": "success",
+			"data": {
+				"count": 2,
+				"plants": [
+					{"plant_id": "plant-1", "plant_name": "Home"},
+					{"plant_id": "plant-2", "plant_name": "Office"}
+				]
+			}
+		}`))
+	}))
+	defer server.Close()
+
+	client := growatt.NewClient("test-token",
+		growatt.WithBaseURL(server.URL+"/"),
+		growatt.WithRateLimit(0),
+	)
+	ctx := context.Background()
+
+	_, err := resolvePlantID(ctx, client, "")
+	if err == nil {
+		t.Fatal("expected error for multiple plants, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "multiple plants found") {
+		t.Errorf("expected 'multiple plants found' error, got: %v", err)
+	}
+}
+
+func TestResolvePlantID_NoPlantsError(t *testing.T) {
+	os.Unsetenv(EnvPlantID)
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Write([]byte(`{
+			"error_code": 0,
+			"error_msg": "success",
+			"data": {"count": 0, "plants": []}
+		}`))
+	}))
+	defer server.Close()
+
+	client := growatt.NewClient("test-token",
+		growatt.WithBaseURL(server.URL+"/"),
+		growatt.WithRateLimit(0),
+	)
+	ctx := context.Background()
+
+	_, err := resolvePlantID(ctx, client, "")
+	if err == nil {
+		t.Fatal("expected error for no plants, got nil")
+	}
+
+	if !strings.Contains(err.Error(), "no plants found") {
+		t.Errorf("expected 'no plants found' error, got: %v", err)
 	}
 }
 

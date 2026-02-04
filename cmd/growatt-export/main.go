@@ -14,6 +14,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	EnvPlantID = "GROWATT_PLANT_ID"
+)
+
 var (
 	plantID  string
 	fromDate string
@@ -35,23 +39,25 @@ Outputs:
   - Hourly aggregated CSV
   - Multi-day statistics markdown (when date range spans multiple days)
 
+If you have only one plant, --plant-id is optional and will be auto-detected.
+For multiple plants, specify --plant-id or set GROWATT_PLANT_ID environment variable.
+
 Examples:
+  growatt-export today
   growatt-export --plant-id=12345 today
-  growatt-export --plant-id=12345 --date=2025-02-01
-  growatt-export --plant-id=12345 --from=2025-01-01 --to=2025-01-31`,
+  growatt-export --date=2025-02-01
+  growatt-export --from=2025-01-01 --to=2025-01-31`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: run,
 	}
 
-	rootCmd.Flags().StringVar(&plantID, "plant-id", "", "Plant ID (required)")
+	rootCmd.Flags().StringVar(&plantID, "plant-id", "", "Plant ID (auto-detected if only one plant, or set GROWATT_PLANT_ID)")
 	rootCmd.Flags().StringVar(&fromDate, "from", "", "Start date (YYYY-MM-DD)")
 	rootCmd.Flags().StringVar(&toDate, "to", "", "End date (YYYY-MM-DD)")
 	rootCmd.Flags().StringVar(&date, "date", "", "Single date (YYYY-MM-DD)")
 	rootCmd.Flags().StringVar(&output, "output", ".", "Output directory")
 	rootCmd.Flags().StringVar(&token, "token", "", "API token (overrides GROWATT_API_KEY)")
 	rootCmd.Flags().StringVar(&baseURL, "base-url", "", "API base URL")
-
-	rootCmd.MarkFlagRequired("plant-id")
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -105,18 +111,24 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	ctx := context.Background()
+
+	// Resolve plant ID
+	resolvedPlantID, err := resolvePlantID(ctx, client, plantID)
+	if err != nil {
+		return err
+	}
+
 	// Ensure output directory exists
 	if err := os.MkdirAll(output, 0755); err != nil {
 		return fmt.Errorf("creating output directory: %w", err)
 	}
 
-	ctx := context.Background()
-
 	fmt.Printf("Fetching power data for plant %s from %s to %s...\n",
-		plantID, from.Format("2006-01-02"), to.Format("2006-01-02"))
+		resolvedPlantID, from.Format("2006-01-02"), to.Format("2006-01-02"))
 
 	// Fetch data for each day
-	powerData, err := client.GetPlantPowerRange(ctx, plantID, from, to)
+	powerData, err := client.GetPlantPowerRange(ctx, resolvedPlantID, from, to)
 	if err != nil {
 		return fmt.Errorf("fetching power data: %w", err)
 	}
@@ -172,6 +184,42 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+// resolvePlantID determines the plant ID to use
+func resolvePlantID(ctx context.Context, client *growatt.Client, flagValue string) (string, error) {
+	// Priority: CLI flag > environment variable > auto-detect
+	if flagValue != "" {
+		return flagValue, nil
+	}
+
+	if envValue := os.Getenv(EnvPlantID); envValue != "" {
+		fmt.Printf("Using plant ID from %s: %s\n", EnvPlantID, envValue)
+		return envValue, nil
+	}
+
+	// Auto-detect: fetch plant list
+	fmt.Println("No plant ID specified, checking available plants...")
+	plants, err := client.ListPlants(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to list plants: %w", err)
+	}
+
+	if len(plants) == 0 {
+		return "", fmt.Errorf("no plants found for this account")
+	}
+
+	if len(plants) == 1 {
+		fmt.Printf("Auto-detected plant: %s (%s)\n", plants[0].PlantName, plants[0].PlantID)
+		return plants[0].PlantID, nil
+	}
+
+	// Multiple plants - user must specify
+	fmt.Println("\nMultiple plants found:")
+	for _, p := range plants {
+		fmt.Printf("  - %s (ID: %s)\n", p.PlantName, p.PlantID)
+	}
+	return "", fmt.Errorf("multiple plants found; specify --plant-id or set %s environment variable", EnvPlantID)
 }
 
 func writeRawCSV(filename string, data []growatt.PowerData) error {

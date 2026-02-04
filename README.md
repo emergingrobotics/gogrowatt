@@ -34,7 +34,15 @@ Set your API token (obtained from https://openapi.growatt.com/):
 export GROWATT_API_KEY="your-api-token"
 ```
 
-Find your plant ID:
+If you have only one plant, that's all you need - the plant ID will be auto-detected.
+
+For multiple plants, also set:
+
+```bash
+export GROWATT_PLANT_ID="your-plant-id"
+```
+
+To find your plant ID:
 
 ```bash
 curl -H "token: $GROWATT_API_KEY" https://openapi.growatt.com/v1/plant/list
@@ -44,14 +52,28 @@ curl -H "token: $GROWATT_API_KEY" https://openapi.growatt.com/v1/plant/list
 
 The `growatt-export` tool fetches 5-minute interval power data and generates CSV files with optional statistical analysis.
 
+### Plant ID Resolution
+
+The plant ID is resolved in this order:
+1. `--plant-id` command line flag
+2. `GROWATT_PLANT_ID` environment variable
+3. Auto-detection (if you have exactly one plant)
+
+If you have multiple plants and don't specify one, the tool will list them and exit.
+
 ### Export Today's Data
 
 ```bash
+# Auto-detect plant (single plant accounts)
+./bin/growatt-export today
+
+# Or specify explicitly
 ./bin/growatt-export --plant-id=12345 today
 ```
 
 Output:
 ```
+Auto-detected plant: Home Solar (12345)
 Fetching power data for plant 12345 from 2025-02-04 to 2025-02-04...
 Wrote raw data to power_2025-02-04.csv
 Wrote hourly data to hourly_2025-02-04.csv
@@ -60,13 +82,13 @@ Wrote hourly data to hourly_2025-02-04.csv
 ### Export a Single Day
 
 ```bash
-./bin/growatt-export --plant-id=12345 --date=2025-01-15
+./bin/growatt-export --date=2025-01-15
 ```
 
 ### Export a Date Range
 
 ```bash
-./bin/growatt-export --plant-id=12345 --from=2025-01-01 --to=2025-01-31
+./bin/growatt-export --from=2025-01-01 --to=2025-01-31
 ```
 
 When exporting multiple days, you get an additional markdown file with statistical analysis:
@@ -80,7 +102,7 @@ Wrote statistics to stats_2025-01-01_to_2025-01-31.md
 ### Export to a Specific Directory
 
 ```bash
-./bin/growatt-export --plant-id=12345 --from=2025-01-01 --to=2025-01-07 --output=./solar-data
+./bin/growatt-export --from=2025-01-01 --to=2025-01-07 --output=./solar-data
 ```
 
 ### Use a Different API Endpoint
@@ -89,10 +111,33 @@ For non-EU regions:
 
 ```bash
 # North America
-./bin/growatt-export --plant-id=12345 --base-url=https://openapi-us.growatt.com/v1/ today
+./bin/growatt-export --base-url=https://openapi-us.growatt.com/v1/ today
 
 # Australia/NZ
-./bin/growatt-export --plant-id=12345 --base-url=https://openapi-au.growatt.com/v1/ today
+./bin/growatt-export --base-url=https://openapi-au.growatt.com/v1/ today
+```
+
+### Multiple Plants
+
+If you have multiple plants:
+
+```bash
+# Set via environment
+export GROWATT_PLANT_ID=12345
+./bin/growatt-export today
+
+# Or specify on command line
+./bin/growatt-export --plant-id=12345 today
+```
+
+Without specifying, you'll see:
+```
+No plant ID specified, checking available plants...
+
+Multiple plants found:
+  - Home Solar (ID: 12345)
+  - Office Solar (ID: 12346)
+Error: multiple plants found; specify --plant-id or set GROWATT_PLANT_ID environment variable
 ```
 
 ### Output Files
@@ -277,6 +322,14 @@ make clean    # Remove build artifacts
 | `plant/energy` | `GetPlantEnergy` | Daily/monthly totals |
 | `device/list` | `ListDevices` | List devices in plant |
 | `device/tlx/tlx_data_info` | `GetMINInverterDetails` | MIN inverter details |
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `GROWATT_API_KEY` | API token (required) |
+| `GROWATT_PLANT_ID` | Default plant ID (optional, auto-detected for single-plant accounts) |
+| `GROWATT_BASE_URL` | Override API endpoint for regional servers |
 
 ## Rate Limits
 

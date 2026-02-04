@@ -185,24 +185,36 @@ func CalculateStdDev(values []float64, mean float64) float64
 ### Usage
 
 ```bash
-# Export today's data
+# Export today's data (auto-detect plant if only one)
+growatt-export today
+
+# Export today's data with explicit plant ID
 growatt-export --plant-id=XXXXX today
 
 # Export date range
-growatt-export --plant-id=XXXXX --from=2025-01-01 --to=2025-01-31
+growatt-export --from=2025-01-01 --to=2025-01-31
 
 # Export single day
-growatt-export --plant-id=XXXXX --date=2025-02-01
+growatt-export --date=2025-02-01
 
 # Specify output directory
-growatt-export --plant-id=XXXXX --output=./data today
+growatt-export --output=./data today
 ```
+
+### Plant ID Resolution
+
+The plant ID is resolved in order of priority:
+1. `--plant-id` command line flag
+2. `GROWATT_PLANT_ID` environment variable
+3. Auto-detection (fetches plant list; succeeds if exactly one plant exists)
+
+If multiple plants exist and none is specified, the CLI lists available plants and exits with an error.
 
 ### Flags
 
 | Flag | Description | Default |
 |------|-------------|---------|
-| `--plant-id` | Plant ID (required) | - |
+| `--plant-id` | Plant ID (optional if single plant) | Auto-detect or `$GROWATT_PLANT_ID` |
 | `--from` | Start date (YYYY-MM-DD) | - |
 | `--to` | End date (YYYY-MM-DD) | - |
 | `--date` | Single date (YYYY-MM-DD) | - |
@@ -318,9 +330,9 @@ func (c *Client) GetPlantPowerRange(ctx context.Context, plantID string, from, t
 
 | Variable | Description |
 |----------|-------------|
-| `GROWATT_API_KEY` | API token for authentication |
+| `GROWATT_API_KEY` | API token for authentication (required) |
+| `GROWATT_PLANT_ID` | Default plant ID (optional; auto-detected for single-plant accounts) |
 | `GROWATT_BASE_URL` | Override default API endpoint |
-| `GROWATT_PLANT_ID` | Default plant ID (for testing) |
 
 ## Dependencies
 
