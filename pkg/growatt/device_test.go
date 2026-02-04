@@ -34,8 +34,8 @@ func TestListDevices(t *testing.T) {
 		t.Errorf("expected 1 device, got %d", len(devices))
 	}
 
-	if devices[0].DeviceSN != "ABC123456" {
-		t.Errorf("expected device SN %q, got %q", "ABC123456", devices[0].DeviceSN)
+	if devices[0].DeviceSN.String() != "ABC123456" {
+		t.Errorf("expected device SN %q, got %q", "ABC123456", devices[0].DeviceSN.String())
 	}
 
 	if devices[0].DeviceType != 7 {
@@ -75,15 +75,15 @@ func TestGetMINInverterDetails(t *testing.T) {
 		t.Errorf("expected serial %q, got %q", "ABC123456", inverter.Serial)
 	}
 
-	if inverter.Pac != 4523.5 {
-		t.Errorf("expected Pac %f, got %f", 4523.5, inverter.Pac)
+	if inverter.Pac.Float64() != 4523.5 {
+		t.Errorf("expected Pac %f, got %f", 4523.5, inverter.Pac.Float64())
 	}
 
-	if inverter.Etoday != 32.5 {
-		t.Errorf("expected Etoday %f, got %f", 32.5, inverter.Etoday)
+	if inverter.Etoday.Float64() != 32.5 {
+		t.Errorf("expected Etoday %f, got %f", 32.5, inverter.Etoday.Float64())
 	}
 
-	if inverter.Temperature != 42.5 {
-		t.Errorf("expected temperature %f, got %f", 42.5, inverter.Temperature)
+	if inverter.Temperature.Float64() != 42.5 {
+		t.Errorf("expected temperature %f, got %f", 42.5, inverter.Temperature.Float64())
 	}
 }

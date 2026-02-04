@@ -198,7 +198,7 @@ func main() {
 
     for _, p := range plants {
         fmt.Printf("Plant: %s (ID: %s) - Current: %.1f W, Today: %.1f kWh\n",
-            p.PlantName, p.PlantID, p.CurrentPower, p.TodayEnergy)
+            p.PlantName, p.PlantID, p.CurrentPower.Float64(), p.TodayEnergy.Float64())
     }
 }
 ```

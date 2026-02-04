@@ -210,15 +210,23 @@ func resolvePlantID(ctx context.Context, client *growatt.Client, flagValue strin
 	}
 
 	if len(plants) == 1 {
-		fmt.Printf("Auto-detected plant: %s (%s)\n", plants[0].PlantName, plants[0].PlantID)
-		return plants[0].PlantID, nil
+		plantID := plants[0].PlantID.String()
+		fmt.Printf("Auto-detected plant: %s (%s)\n", plants[0].PlantName, plantID)
+		fmt.Println()
+		fmt.Println("Tip: To avoid rate limits from auto-detection, set your plant ID:")
+		fmt.Printf("  export %s=%s\n", EnvPlantID, plantID)
+		fmt.Println()
+		return plantID, nil
 	}
 
 	// Multiple plants - user must specify
 	fmt.Println("\nMultiple plants found:")
 	for _, p := range plants {
-		fmt.Printf("  - %s (ID: %s)\n", p.PlantName, p.PlantID)
+		fmt.Printf("  - %s (ID: %s)\n", p.PlantName, p.PlantID.String())
 	}
+	fmt.Println()
+	fmt.Println("Set one of these as your default:")
+	fmt.Printf("  export %s=<plant-id>\n", EnvPlantID)
 	return "", fmt.Errorf("multiple plants found; specify --plant-id or set %s environment variable", EnvPlantID)
 }
 

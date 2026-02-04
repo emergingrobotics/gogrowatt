@@ -55,16 +55,16 @@ func TestListPlants(t *testing.T) {
 		t.Errorf("expected 2 plants, got %d", len(plants))
 	}
 
-	if plants[0].PlantID != "12345" {
-		t.Errorf("expected plant ID %q, got %q", "12345", plants[0].PlantID)
+	if plants[0].PlantID.String() != "12345" {
+		t.Errorf("expected plant ID %q, got %q", "12345", plants[0].PlantID.String())
 	}
 
 	if plants[0].PlantName != "Home Solar" {
 		t.Errorf("expected plant name %q, got %q", "Home Solar", plants[0].PlantName)
 	}
 
-	if plants[0].CurrentPower != 4523.5 {
-		t.Errorf("expected current power %f, got %f", 4523.5, plants[0].CurrentPower)
+	if plants[0].CurrentPower.Float64() != 4523.5 {
+		t.Errorf("expected current power %f, got %f", 4523.5, plants[0].CurrentPower.Float64())
 	}
 }
 
@@ -118,8 +118,8 @@ func TestGetPlantPower(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if power.PlantID != "12345" {
-		t.Errorf("expected plant ID %q, got %q", "12345", power.PlantID)
+	if power.PlantID.String() != "12345" {
+		t.Errorf("expected plant ID %q, got %q", "12345", power.PlantID.String())
 	}
 
 	if power.Date != "2025-02-03" {
@@ -171,8 +171,8 @@ func TestGetPlantEnergy(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if energy.PlantID != "12345" {
-		t.Errorf("expected plant ID %q, got %q", "12345", energy.PlantID)
+	if energy.PlantID.String() != "12345" {
+		t.Errorf("expected plant ID %q, got %q", "12345", energy.PlantID.String())
 	}
 
 	if len(energy.Datas) != 7 {

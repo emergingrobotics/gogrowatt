@@ -3,6 +3,7 @@ package growatt
 import (
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // APIError represents an error returned by the Growatt API
@@ -19,6 +20,7 @@ func (e *APIError) Error() string {
 var (
 	ErrPermissionDenied = &APIError{Code: 10011, Message: "permission denied"}
 	ErrPlantNotFound    = &APIError{Code: 10012, Message: "plant not found"}
+	ErrFrequentAccess   = &APIError{Code: 10012, Message: "frequently access (rate limited)"}
 	ErrInvalidToken     = &APIError{Code: 10011, Message: "invalid token"}
 )
 
@@ -42,7 +44,17 @@ func IsPermissionDenied(err error) bool {
 func IsPlantNotFound(err error) bool {
 	var apiErr *APIError
 	if errors.As(err, &apiErr) {
-		return apiErr.Code == 10012
+		return apiErr.Code == 10012 && !IsRateLimited(err)
+	}
+	return false
+}
+
+// IsRateLimited checks if the error is a rate limit error
+func IsRateLimited(err error) bool {
+	var apiErr *APIError
+	if errors.As(err, &apiErr) {
+		return apiErr.Code == 10012 && (apiErr.Message == "error_frequently_access" ||
+			strings.Contains(apiErr.Message, "frequently"))
 	}
 	return false
 }

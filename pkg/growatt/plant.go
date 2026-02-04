@@ -68,9 +68,9 @@ func (c *Client) GetPlantPower(ctx context.Context, plantID string, date time.Ti
 		return nil, err
 	}
 
-	// Convert map to sorted slice
+	// Convert to sorted slice
 	powers := make([]PowerDataPoint, 0, len(raw.Powers))
-	for timeStr, power := range raw.Powers {
+	for timeStr, power := range map[string]float64(raw.Powers) {
 		powers = append(powers, PowerDataPoint{
 			Time:  timeStr,
 			Power: power,
@@ -83,7 +83,7 @@ func (c *Client) GetPlantPower(ctx context.Context, plantID string, date time.Ti
 	})
 
 	return &PowerData{
-		PlantID: raw.PlantID,
+		PlantID: FlexString(raw.PlantID),
 		Date:    date.Format("2006-01-02"),
 		Powers:  powers,
 	}, nil
@@ -147,7 +147,7 @@ func (c *Client) GetPlantEnergy(ctx context.Context, plantID, startDate, endDate
 	})
 
 	return &EnergyData{
-		PlantID: raw.PlantID,
+		PlantID: FlexString(raw.PlantID),
 		Datas:   datas,
 	}, nil
 }
@@ -161,8 +161,18 @@ func ParsePowerData(data *PowerData) ([]ParsedPowerData, error) {
 
 	result := make([]ParsedPowerData, 0, len(data.Powers))
 	for _, p := range data.Powers {
-		parts := strings.Split(p.Time, ":")
-		if len(parts) != 2 {
+		timeStr := p.Time
+
+		// Handle full datetime format "YYYY-MM-DD HH:MM"
+		if strings.Contains(timeStr, " ") {
+			parts := strings.Split(timeStr, " ")
+			if len(parts) == 2 {
+				timeStr = parts[1] // Extract just the time part
+			}
+		}
+
+		parts := strings.Split(timeStr, ":")
+		if len(parts) < 2 {
 			continue
 		}
 
@@ -178,7 +188,7 @@ func ParsePowerData(data *PowerData) ([]ParsedPowerData, error) {
 
 		result = append(result, ParsedPowerData{
 			Date:   date,
-			Time:   p.Time,
+			Time:   timeStr, // Store just the time part
 			Power:  p.Power,
 			Hour:   hour,
 			Minute: minute,
