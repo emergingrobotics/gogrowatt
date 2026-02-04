@@ -38,6 +38,17 @@ func TestFlexFloat_EmptyString(t *testing.T) {
 	}
 }
 
+func TestFlexFloat_Null(t *testing.T) {
+	var f FlexFloat
+	err := json.Unmarshal([]byte(`null`), &f)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if f.Float64() != 0 {
+		t.Errorf("expected 0, got %f", f.Float64())
+	}
+}
+
 func TestFlexFloat_Integer(t *testing.T) {
 	var f FlexFloat
 	err := json.Unmarshal([]byte(`100`), &f)
@@ -189,6 +200,22 @@ func TestFlexPowers_ArrayOfArrays(t *testing.T) {
 	}
 	if p["12:00"] != 4500.5 {
 		t.Errorf("expected 4500.5, got %f", p["12:00"])
+	}
+}
+
+func TestFlexPowers_NullPower(t *testing.T) {
+	// API returns null for power when no data
+	input := `[{"time": "2025-02-03 12:00", "power": null}, {"time": "2025-02-03 12:05", "power": 4500.5}]`
+	var p FlexPowers
+	err := json.Unmarshal([]byte(input), &p)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if p["12:00"] != 0 {
+		t.Errorf("expected 0 for null power, got %f", p["12:00"])
+	}
+	if p["12:05"] != 4500.5 {
+		t.Errorf("expected 4500.5, got %f", p["12:05"])
 	}
 }
 

@@ -11,6 +11,12 @@ import (
 type FlexFloat float64
 
 func (f *FlexFloat) UnmarshalJSON(data []byte) error {
+	// Handle null
+	if string(data) == "null" {
+		*f = 0
+		return nil
+	}
+
 	// Try as number first
 	var num float64
 	if err := json.Unmarshal(data, &num); err == nil {
