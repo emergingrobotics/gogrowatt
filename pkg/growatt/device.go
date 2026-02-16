@@ -134,6 +134,43 @@ func (c *Client) GetMINInverterHistory(ctx context.Context, serial string, date 
 	}, nil
 }
 
+// GetMINInverterHistoryDetail returns detailed historical data for a
+// MIN/TLX inverter, preserving all per-string voltage, current, and power
+// fields from each data point. Use this instead of GetMINInverterHistory
+// when you need more than just AC power.
+func (c *Client) GetMINInverterHistoryDetail(ctx context.Context, serial string, date time.Time, timezone string) ([]MINHistoryDataPoint, error) {
+	if timezone == "" {
+		timezone = "US/Central"
+	}
+
+	dateStr := date.Format("2006-01-02")
+
+	reqBody := MINHistoryRequest{
+		DeviceSN:   serial,
+		StartDate:  dateStr,
+		EndDate:    dateStr,
+		TimezoneID: timezone,
+		Page:       1,
+		PerPage:    100,
+	}
+
+	body, err := c.postForm(ctx, "device/tlx/tlx_data", reqBody.ToFormData())
+	if err != nil {
+		return nil, err
+	}
+
+	histResp, err := parseResponse[MINHistoryResponse](body)
+	if err != nil {
+		return nil, err
+	}
+
+	sort.Slice(histResp.Datas, func(i, j int) bool {
+		return histResp.Datas[i].Time < histResp.Datas[j].Time
+	})
+
+	return histResp.Datas, nil
+}
+
 // GetMINInverterHistoryRange fetches historical data for a date range
 // Note: API has 7-day maximum per request, this method handles pagination
 func (c *Client) GetMINInverterHistoryRange(ctx context.Context, serial string, from, to time.Time, timezone string) ([]PowerData, error) {
