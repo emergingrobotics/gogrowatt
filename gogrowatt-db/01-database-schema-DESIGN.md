@@ -1852,7 +1852,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogrowatt/internal/db"
+	"github.com/emergingrobotics/gogrowatt/internal/db"
 )
 
 // testPool is created once per package using TestMain

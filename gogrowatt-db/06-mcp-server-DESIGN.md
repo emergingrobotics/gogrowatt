@@ -91,8 +91,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/gogrowatt/internal/apiclient"
-	"github.com/gogrowatt/internal/mcp"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/mcp"
 )
 
 // Config holds all configuration read from environment variables.
@@ -316,7 +316,7 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
 )
 
 const (
@@ -1177,7 +1177,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
 )
 
 // --- Tool 1: list_plants ---
@@ -1578,7 +1578,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
 )
 
 // --- Resource: solar://plants ---
@@ -1909,7 +1909,7 @@ import (
 	"math"
 	"strings"
 
-	"github.com/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
 )
 
 // commaFloat formats a float with commas for thousands: 5389.9 -> "5,389.9"
@@ -2322,7 +2322,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
 )
 
 // apiErrorResult converts a REST API error into a user-friendly MCP tool
@@ -2497,7 +2497,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gogrowatt/internal/apiclient"
+	"github.com/emergingrobotics/gogrowatt/internal/apiclient"
 )
 
 func assertContains(t *testing.T, s, substr string) {

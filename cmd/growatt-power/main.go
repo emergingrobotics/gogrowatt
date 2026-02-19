@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 	"github.com/spf13/cobra"
 )
 

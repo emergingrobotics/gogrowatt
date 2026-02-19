@@ -355,9 +355,9 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/gogrowatt/internal/db"
-	"github.com/gogrowatt/internal/fetcher"
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/internal/db"
+	"github.com/emergingrobotics/gogrowatt/internal/fetcher"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 	"github.com/spf13/cobra"
 )
 
@@ -778,7 +778,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 // Fetcher is the main fetch orchestrator.
@@ -1225,7 +1225,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gogrowatt/internal/db"
+	"github.com/emergingrobotics/gogrowatt/internal/db"
 )
 
 const batchSize = 100 // matches API page size
@@ -1366,7 +1366,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 // ParseMINHistoryData converts raw MINHistoryDataPoint slices into PowerReading slices
@@ -1483,7 +1483,7 @@ import (
 	"context"
 	"log/slog"
 
-	"github.com/gogrowatt/internal/db"
+	"github.com/emergingrobotics/gogrowatt/internal/db"
 )
 
 // MetadataTracker records collection runs and gap information.
@@ -1559,7 +1559,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gogrowatt/internal/db"
+	"github.com/emergingrobotics/gogrowatt/internal/db"
 )
 
 // BackfillManager handles startup backfill of historical data.
@@ -1724,7 +1724,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/gogrowatt/internal/db"
+	"github.com/emergingrobotics/gogrowatt/internal/db"
 )
 
 // gapThreshold is the minimum gap duration to report.
@@ -1935,7 +1935,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 // GrowattClient abstracts the Growatt API methods used by the fetcher.
@@ -2087,7 +2087,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 // MockGrowattClient implements GrowattClient for testing.
@@ -2229,7 +2229,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 func TestParseReadingTime(t *testing.T) {

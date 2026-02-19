@@ -258,7 +258,7 @@ type DeviceListData struct {
 	Devices []Device `json:"devices"`
 }
 
-// MINInverterData represents data for MIN/TLX inverters
+// MINInverterData represents data for MIN/TLX inverters (device_type 7)
 type MINInverterData struct {
 	Serial      string    `json:"tlx_sn"`
 	Status      int       `json:"status"`

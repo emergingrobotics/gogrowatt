@@ -26,12 +26,12 @@ The Growatt ShinePhone app shows basic stats, but getting raw data unlocks deepe
 
 ```bash
 # Clone and build
-git clone https://github.com/gogrowatt/gogrowatt.git
+git clone https://github.com/emergingrobotics/gogrowatt/gogrowatt.git
 cd gogrowatt
 make build
 
 # Or install directly
-go install github.com/gogrowatt/cmd/growatt-export@latest
+go install github.com/emergingrobotics/gogrowatt/cmd/growatt-export@latest
 ```
 
 ## Quick Start
@@ -218,7 +218,7 @@ import (
     "log"
     "time"
 
-    "github.com/gogrowatt/pkg/growatt"
+    "github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 func main() {
@@ -309,7 +309,7 @@ client := growatt.NewClient("your-token",
 The `internal/stats` package provides hourly aggregation:
 
 ```go
-import "github.com/gogrowatt/internal/stats"
+import "github.com/emergingrobotics/gogrowatt/internal/stats"
 
 // Parse raw power data
 parsed, _ := growatt.ParsePowerData(powerData)

@@ -4,7 +4,7 @@ import (
 	"math"
 	"sort"
 
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 // HourlyStats represents statistics for a single hour

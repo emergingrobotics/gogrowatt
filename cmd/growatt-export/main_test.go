@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/gogrowatt/internal/stats"
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/internal/stats"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 func TestWriteRawCSV(t *testing.T) {

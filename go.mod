@@ -1,4 +1,4 @@
-module github.com/gogrowatt
+module github.com/emergingrobotics/gogrowatt
 
 go 1.21
 

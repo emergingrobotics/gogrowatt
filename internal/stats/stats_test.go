@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gogrowatt/pkg/growatt"
+	"github.com/emergingrobotics/gogrowatt/pkg/growatt"
 )
 
 func TestCalculateStdDev(t *testing.T) {

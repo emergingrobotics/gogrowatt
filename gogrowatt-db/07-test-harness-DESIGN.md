@@ -1264,8 +1264,8 @@ import (
     "testing"
     "time"
 
-    "github.com/gogrowatt/integration/testdb"
-    "github.com/gogrowatt/integration/testharness"
+    "github.com/emergingrobotics/gogrowatt/integration/testdb"
+    "github.com/emergingrobotics/gogrowatt/integration/testharness"
 )
 
 // StandardSetup creates the default plant/device records and returns
@@ -1318,9 +1318,9 @@ import (
     "testing"
     "time"
 
-    "github.com/gogrowatt/integration/testdb"
-    "github.com/gogrowatt/integration/testharness"
-    "github.com/gogrowatt/pkg/growatt"
+    "github.com/emergingrobotics/gogrowatt/integration/testdb"
+    "github.com/emergingrobotics/gogrowatt/integration/testharness"
+    "github.com/emergingrobotics/gogrowatt/pkg/growatt"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 )
@@ -1786,9 +1786,9 @@ import (
     "testing"
     "time"
 
-    "github.com/gogrowatt/integration/fixtures"
-    "github.com/gogrowatt/integration/testdb"
-    "github.com/gogrowatt/integration/testharness"
+    "github.com/emergingrobotics/gogrowatt/integration/fixtures"
+    "github.com/emergingrobotics/gogrowatt/integration/testdb"
+    "github.com/emergingrobotics/gogrowatt/integration/testharness"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 )
@@ -1907,9 +1907,9 @@ import (
     "testing"
     "time"
 
-    "github.com/gogrowatt/integration/fixtures"
-    "github.com/gogrowatt/integration/testdb"
-    "github.com/gogrowatt/integration/testharness"
+    "github.com/emergingrobotics/gogrowatt/integration/fixtures"
+    "github.com/emergingrobotics/gogrowatt/integration/testdb"
+    "github.com/emergingrobotics/gogrowatt/integration/testharness"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 )
@@ -2090,7 +2090,7 @@ import (
     "testing"
     "time"
 
-    "github.com/gogrowatt/integration/testharness"
+    "github.com/emergingrobotics/gogrowatt/integration/testharness"
     "github.com/stretchr/testify/assert"
     "github.com/stretchr/testify/require"
 )
@@ -2708,7 +2708,7 @@ import (
     "os"
     "strconv"
 
-    "github.com/gogrowatt/integration/testharness"
+    "github.com/emergingrobotics/gogrowatt/integration/testharness"
 )
 
 func main() {
