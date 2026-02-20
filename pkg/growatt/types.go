@@ -275,6 +275,45 @@ type MINInverterData struct {
 	Temperature FlexFloat `json:"temperature"`
 }
 
+// TLXLastData represents the real-time telemetry from a TLX/MIN inverter
+// via the device/tlx/tlx_last_data POST endpoint.
+type TLXLastData struct {
+	Pac  FlexFloat `json:"pac"`
+	Ppv  FlexFloat `json:"ppv"`
+	Ppv1 FlexFloat `json:"ppv1"`
+	Ppv2 FlexFloat `json:"ppv2"`
+
+	Vpv1 FlexFloat `json:"vpv1"`
+	Vpv2 FlexFloat `json:"vpv2"`
+	Ipv1 FlexFloat `json:"ipv1"`
+	Ipv2 FlexFloat `json:"ipv2"`
+
+	Vac1 FlexFloat `json:"vac1"`
+	Iac1 FlexFloat `json:"iac1"`
+	Fac  FlexFloat `json:"fac"`
+	Pf   FlexFloat `json:"pf"`
+
+	EacToday  FlexFloat `json:"eacToday"`
+	EacTotal  FlexFloat `json:"eacTotal"`
+	Epv1Today FlexFloat `json:"epv1Today"`
+	Epv2Today FlexFloat `json:"epv2Today"`
+	Epv1Total FlexFloat `json:"epv1Total"`
+	Epv2Total FlexFloat `json:"epv2Total"`
+	EpvTotal  FlexFloat `json:"epvTotal"`
+
+	Temp1 FlexFloat `json:"temp1"`
+	Temp5 FlexFloat `json:"temp5"`
+
+	Status    int `json:"status"`
+	FaultType int `json:"faultType"`
+	WarnCode  int `json:"warnCode"`
+
+	SerialNum string    `json:"serialNum"`
+	DataLogSN string    `json:"dataLogSn"`
+	Time      string    `json:"time"`
+	TimeTotal FlexFloat `json:"timeTotal"`
+}
+
 // ParsedPowerData is power data with parsed time
 type ParsedPowerData struct {
 	Date    time.Time

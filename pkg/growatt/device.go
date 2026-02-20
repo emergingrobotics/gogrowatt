@@ -42,6 +42,21 @@ func (c *Client) GetMINInverterDetails(ctx context.Context, serial string) (*MIN
 	return parseResponse[MINInverterData](body)
 }
 
+// GetTLXLastData returns the latest real-time telemetry for a TLX/MIN inverter.
+// This uses the device/tlx/tlx_last_data POST endpoint which provides the richest
+// data available: power, voltage, current, temperature, energy counters, and status.
+func (c *Client) GetTLXLastData(ctx context.Context, serial string) (*TLXLastData, error) {
+	data := url.Values{}
+	data.Set("tlx_sn", serial)
+
+	body, err := c.postForm(ctx, "device/tlx/tlx_last_data", data)
+	if err != nil {
+		return nil, err
+	}
+
+	return parseResponse[TLXLastData](body)
+}
+
 // MINHistoryRequest is the request body for MIN inverter historical data
 type MINHistoryRequest struct {
 	DeviceSN   string
@@ -215,6 +230,10 @@ func (c *Client) postForm(ctx context.Context, endpoint string, data url.Values)
 		return nil, fmt.Errorf("executing request: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("unexpected HTTP status %d %s for %s", resp.StatusCode, resp.Status, endpoint)
+	}
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sync"
 	"time"
 )
 
@@ -19,11 +20,12 @@ const (
 	EnvBaseURL         = "GROWATT_BASE_URL"
 )
 
-// Client is the Growatt API client
+// Client is the Growatt API client. It is safe for concurrent use.
 type Client struct {
 	baseURL    string
 	token      string
 	httpClient *http.Client
+	rateMu    sync.Mutex
 	rateLimit  time.Duration
 	lastCall   time.Time
 }
@@ -95,7 +97,9 @@ func NewClientFromEnv(opts ...ClientOption) (*Client, error) {
 
 // SetRateLimit sets the minimum delay between API calls
 func (c *Client) SetRateLimit(d time.Duration) {
+	c.rateMu.Lock()
 	c.rateLimit = d
+	c.rateMu.Unlock()
 }
 
 // Token returns the current API token
@@ -108,8 +112,12 @@ func (c *Client) BaseURL() string {
 	return c.baseURL
 }
 
-// enforceRateLimit waits if necessary to respect rate limiting
+// enforceRateLimit waits if necessary to respect rate limiting.
+// Thread-safe: serializes concurrent API calls through a mutex.
 func (c *Client) enforceRateLimit() {
+	c.rateMu.Lock()
+	defer c.rateMu.Unlock()
+
 	if c.rateLimit > 0 && !c.lastCall.IsZero() {
 		elapsed := time.Since(c.lastCall)
 		if elapsed < c.rateLimit {
@@ -141,6 +149,10 @@ func (c *Client) doRequest(ctx context.Context, method, endpoint string, params 
 		return nil, fmt.Errorf("executing request: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("unexpected HTTP status %d %s for %s", resp.StatusCode, resp.Status, endpoint)
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

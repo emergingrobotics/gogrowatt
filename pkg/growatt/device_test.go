@@ -139,6 +139,76 @@ func TestGetMINInverterHistoryDetail(t *testing.T) {
 	assertFlexFloat(t, "Iac1", latest.Iac1, 14.5)
 }
 
+func TestGetTLXLastData(t *testing.T) {
+	server := newTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/device/tlx/tlx_last_data" {
+			t.Errorf("expected path /device/tlx/tlx_last_data, got %s", r.URL.Path)
+		}
+		if r.Method != http.MethodPost {
+			t.Errorf("expected POST, got %s", r.Method)
+		}
+
+		r.ParseForm()
+		if sn := r.FormValue("tlx_sn"); sn != "ABC123456" {
+			t.Errorf("expected tlx_sn %q, got %q", "ABC123456", sn)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(loadTestData(t, "tlx_last_data.json"))
+	})
+	defer server.Close()
+
+	client := newTestClient(t, server)
+	ctx := context.Background()
+
+	data, err := client.GetTLXLastData(ctx, "ABC123456")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	assertFlexFloat(t, "Pac", data.Pac, 5039.5)
+	assertFlexFloat(t, "Ppv", data.Ppv, 5218.2)
+	assertFlexFloat(t, "Ppv1", data.Ppv1, 2345.7)
+	assertFlexFloat(t, "Ppv2", data.Ppv2, 2872.5)
+	assertFlexFloat(t, "Vpv1", data.Vpv1, 223.4)
+	assertFlexFloat(t, "Vpv2", data.Vpv2, 276.2)
+	assertFlexFloat(t, "Ipv1", data.Ipv1, 10.5)
+	assertFlexFloat(t, "Ipv2", data.Ipv2, 10.4)
+	assertFlexFloat(t, "Vac1", data.Vac1, 236.8)
+	assertFlexFloat(t, "Iac1", data.Iac1, 21.2)
+	assertFlexFloat(t, "Fac", data.Fac, 59.98)
+	assertFlexFloat(t, "Pf", data.Pf, 1.0)
+	assertFlexFloat(t, "EacToday", data.EacToday, 32.5)
+	assertFlexFloat(t, "EacTotal", data.EacTotal, 12456.7)
+	assertFlexFloat(t, "Epv1Today", data.Epv1Today, 16.1)
+	assertFlexFloat(t, "Epv2Today", data.Epv2Today, 16.9)
+	assertFlexFloat(t, "Epv1Total", data.Epv1Total, 6200.3)
+	assertFlexFloat(t, "Epv2Total", data.Epv2Total, 6256.4)
+	assertFlexFloat(t, "EpvTotal", data.EpvTotal, 12456.7)
+	assertFlexFloat(t, "Temp1", data.Temp1, 42.5)
+	assertFlexFloat(t, "Temp5", data.Temp5, 55.3)
+	assertFlexFloat(t, "TimeTotal", data.TimeTotal, 8760.5)
+
+	if data.Status != 100 {
+		t.Errorf("Status = %d, want %d", data.Status, 100)
+	}
+	if data.FaultType != 0 {
+		t.Errorf("FaultType = %d, want %d", data.FaultType, 0)
+	}
+	if data.WarnCode != 0 {
+		t.Errorf("WarnCode = %d, want %d", data.WarnCode, 0)
+	}
+	if data.SerialNum != "ABC123456" {
+		t.Errorf("SerialNum = %q, want %q", data.SerialNum, "ABC123456")
+	}
+	if data.DataLogSN != "DL987654" {
+		t.Errorf("DataLogSN = %q, want %q", data.DataLogSN, "DL987654")
+	}
+	if data.Time != "2026-02-19 12:30:00" {
+		t.Errorf("Time = %q, want %q", data.Time, "2026-02-19 12:30:00")
+	}
+}
+
 func assertFlexFloat(t *testing.T, name string, got FlexFloat, want float64) {
 	t.Helper()
 	if math.Abs(got.Float64()-want) > 0.01 {
