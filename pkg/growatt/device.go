@@ -57,6 +57,68 @@ func (c *Client) GetTLXLastData(ctx context.Context, serial string) (*TLXLastDat
 	return parseResponse[TLXLastData](body)
 }
 
+// TLXHistoryResponse is the response from the tlx_data historical endpoint.
+// Each element in Datas has the same fields as TLXLastData.
+type TLXHistoryResponse struct {
+	Count        int           `json:"count"`
+	Datas        []TLXLastData `json:"datas"`
+	DataloggerSN string        `json:"datalogger_sn"`
+}
+
+// maxHistoryPages limits pagination to prevent unbounded API calls.
+const maxHistoryPages = 50
+
+// GetTLXHistory returns historical telemetry for a TLX/MIN inverter for a
+// single date. Unlike GetMINInverterHistoryDetail (which returns only 8
+// fields), this returns the full TLXLastData field set for each 5-minute
+// data point. Handles pagination internally (API max 100 per page).
+func (c *Client) GetTLXHistory(ctx context.Context, serial string, date time.Time, timezone string) ([]TLXLastData, error) {
+	if timezone == "" {
+		timezone = "US/Central"
+	}
+
+	dateStr := date.Format("2006-01-02")
+	var allPoints []TLXLastData
+
+	for page := 1; page <= maxHistoryPages; page++ {
+		select {
+		case <-ctx.Done():
+			return allPoints, ctx.Err()
+		default:
+		}
+
+		formData := url.Values{}
+		formData.Set("tlx_sn", serial)
+		formData.Set("start_date", dateStr)
+		formData.Set("end_date", dateStr)
+		formData.Set("timezone_id", timezone)
+		formData.Set("page", fmt.Sprintf("%d", page))
+		formData.Set("perpage", "100")
+
+		body, err := c.postForm(ctx, "device/tlx/tlx_data", formData)
+		if err != nil {
+			return allPoints, fmt.Errorf("fetching TLX history page %d: %w", page, err)
+		}
+
+		histResp, err := parseResponse[TLXHistoryResponse](body)
+		if err != nil {
+			return allPoints, fmt.Errorf("parsing TLX history page %d: %w", page, err)
+		}
+
+		allPoints = append(allPoints, histResp.Datas...)
+
+		if len(allPoints) >= histResp.Count || len(histResp.Datas) < 100 {
+			break
+		}
+	}
+
+	sort.Slice(allPoints, func(i, j int) bool {
+		return allPoints[i].Time < allPoints[j].Time
+	})
+
+	return allPoints, nil
+}
+
 // MINHistoryRequest is the request body for MIN inverter historical data
 type MINHistoryRequest struct {
 	DeviceSN   string

@@ -139,6 +139,104 @@ func TestGetMINInverterHistoryDetail(t *testing.T) {
 	assertFlexFloat(t, "Iac1", latest.Iac1, 14.5)
 }
 
+func TestGetTLXHistory(t *testing.T) {
+	server := newTestServer(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/device/tlx/tlx_data" {
+			t.Errorf("expected path /device/tlx/tlx_data, got %s", r.URL.Path)
+		}
+		if r.Method != http.MethodPost {
+			t.Errorf("expected POST, got %s", r.Method)
+		}
+
+		r.ParseForm()
+		if sn := r.FormValue("tlx_sn"); sn != "ABC123456" {
+			t.Errorf("expected tlx_sn %q, got %q", "ABC123456", sn)
+		}
+		if sd := r.FormValue("start_date"); sd != "2026-02-20" {
+			t.Errorf("expected start_date %q, got %q", "2026-02-20", sd)
+		}
+		if ed := r.FormValue("end_date"); ed != "2026-02-20" {
+			t.Errorf("expected end_date %q, got %q", "2026-02-20", ed)
+		}
+		if tz := r.FormValue("timezone_id"); tz != "US/Central" {
+			t.Errorf("expected timezone_id %q, got %q", "US/Central", tz)
+		}
+		if pg := r.FormValue("page"); pg != "1" {
+			t.Errorf("expected page %q, got %q", "1", pg)
+		}
+		if pp := r.FormValue("perpage"); pp != "100" {
+			t.Errorf("expected perpage %q, got %q", "100", pp)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(loadTestData(t, "tlx_history.json"))
+	})
+	defer server.Close()
+
+	client := newTestClient(t, server)
+	ctx := context.Background()
+
+	date := time.Date(2026, 2, 20, 0, 0, 0, 0, time.UTC)
+	points, err := client.GetTLXHistory(ctx, "ABC123456", date, "US/Central")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	if len(points) != 3 {
+		t.Fatalf("expected 3 data points, got %d", len(points))
+	}
+
+	// Verify sorted by time (fixture has data out of order)
+	if points[0].Time > points[1].Time || points[1].Time > points[2].Time {
+		t.Errorf("data points not sorted by time: %q, %q, %q",
+			points[0].Time, points[1].Time, points[2].Time)
+	}
+
+	// Verify first point (earliest after sort: 10:00)
+	first := points[0]
+	assertFlexFloat(t, "first.Pac", first.Pac, 3200.5)
+	assertFlexFloat(t, "first.Ppv", first.Ppv, 3400.0)
+	assertFlexFloat(t, "first.Fac", first.Fac, 59.98)
+	assertFlexFloat(t, "first.EacToday", first.EacToday, 11.8)
+	assertFlexFloat(t, "first.Temp1", first.Temp1, 34.8)
+	if first.Status != 1 {
+		t.Errorf("first.Status = %d, want %d", first.Status, 1)
+	}
+	if first.SerialNum != "ABC123456" {
+		t.Errorf("first.SerialNum = %q, want %q", first.SerialNum, "ABC123456")
+	}
+
+	// Verify last point (latest after sort: 10:10) has full field set
+	latest := points[2]
+	assertFlexFloat(t, "latest.Pac", latest.Pac, 3500.0)
+	assertFlexFloat(t, "latest.Ppv", latest.Ppv, 3700.0)
+	assertFlexFloat(t, "latest.Ppv1", latest.Ppv1, 2000.0)
+	assertFlexFloat(t, "latest.Ppv2", latest.Ppv2, 1700.0)
+	assertFlexFloat(t, "latest.Vpv1", latest.Vpv1, 382.0)
+	assertFlexFloat(t, "latest.Vpv2", latest.Vpv2, 377.0)
+	assertFlexFloat(t, "latest.Ipv1", latest.Ipv1, 5.2)
+	assertFlexFloat(t, "latest.Ipv2", latest.Ipv2, 5.0)
+	assertFlexFloat(t, "latest.Vac1", latest.Vac1, 240.8)
+	assertFlexFloat(t, "latest.Iac1", latest.Iac1, 14.5)
+	assertFlexFloat(t, "latest.Fac", latest.Fac, 60.01)
+	assertFlexFloat(t, "latest.Pf", latest.Pf, 1.0)
+	assertFlexFloat(t, "latest.EacToday", latest.EacToday, 12.5)
+	assertFlexFloat(t, "latest.EacTotal", latest.EacTotal, 12400.0)
+	assertFlexFloat(t, "latest.Epv1Today", latest.Epv1Today, 6.3)
+	assertFlexFloat(t, "latest.Epv2Today", latest.Epv2Today, 6.2)
+	assertFlexFloat(t, "latest.Temp1", latest.Temp1, 35.2)
+	assertFlexFloat(t, "latest.Temp5", latest.Temp5, 42.1)
+	if latest.Status != 1 {
+		t.Errorf("latest.Status = %d, want %d", latest.Status, 1)
+	}
+	if latest.FaultType != 0 {
+		t.Errorf("latest.FaultType = %d, want %d", latest.FaultType, 0)
+	}
+	if latest.Time != "2026-02-20 10:10:00" {
+		t.Errorf("latest.Time = %q, want %q", latest.Time, "2026-02-20 10:10:00")
+	}
+}
+
 func TestGetTLXLastData(t *testing.T) {
 	server := newTestServer(t, func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/device/tlx/tlx_last_data" {
